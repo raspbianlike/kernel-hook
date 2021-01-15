@@ -1,5 +1,17 @@
 #include "hook.h"
 
+// Credit to: Filip Pynckels - MIT/GPL dual (http://users.telenet.be/pynckels/2020-2-Linux-kernel-unexported-syms-functions.pdf)
+unsigned long lookup_name( const char *name ){
+    struct kprobe kp;
+    unsigned long retval;
+
+    kp.symbol_name = name;
+    if (register_kprobe(&kp) < 0) return 0;
+    retval = (unsigned long)kp.addr;
+    unregister_kprobe(&kp);
+    return retval;
+}
+
 int start_hook(fthook_t *hook, uintptr_t hooked_function, ftrace_fn hook_function)
 {
 	int ret = 0;
@@ -51,7 +63,7 @@ int start_hook_list(const fthinit_t *hook_list, size_t size)
 
 	for (i = 0; i < size; i++) {
 		if (hook_list[i].symbol_name) {
-			symaddr = kallsyms_lookup_name(hook_list[i].symbol_name);
+			symaddr = lookup_name(hook_list[i].symbol_name);
 		} else {
 			symaddr = hook_list[i].symbol_getter();
 		}
