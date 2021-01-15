@@ -2,6 +2,7 @@
 #define VMHOOK_HOOK_H
 
 #include <linux/ftrace.h>
+#include <linux/kprobes.h>
 
 #define DEFINE_ORIGINAL_2(fname, hook_ptr)	\
 	typeof(&fname) orig_fn = (typeof(&fname)) (hook_ptr)->original_function
